@@ -1,0 +1,39 @@
+version: "3.6"
+services:
+  api:
+    build: 
+      context: .
+      args:
+        - NODE_ENV=development
+        - DB_CONNECTION=mysql
+        - DATABASE_URL=mysql://root:mysql@db:3306/cats-app?charset=utf8mb4
+        - PICTURES_STORAGE_URL=./public/pictures
+        - SECRET_KEY=RXCT34ZE5GFDSFD756
+    ports:
+      - 8000:8000
+    volumes:
+      - pictures-volume:/app/public/pictures
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+
+  db:
+    image: mysql:5.7
+    expose:
+      - 3306
+    environment:
+      - MYSQL_DATABASE=cats-app
+      - MYSQL_ROOT_PASSWORD=mysql
+    healthcheck:
+     test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot","-pmysql"]
+     timeout: 20s
+     retries: 10
+    volumes:
+      - data-volume:/var/lib/mysql
+
+volumes:
+  data-volume:
+  pictures-volume:
+               
